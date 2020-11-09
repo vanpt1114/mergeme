@@ -29,7 +29,7 @@ func PostMessage(m Message) {
     }
 
     dataToSend, _ := json.Marshal(SlackPayload{
-        Channel:        "C019QRNJ6DN",
+        Channel:        "xxxN",
         Username:       "MergeMe",
         IconEmoji:      ":buff-mr:",
         Attachments:    dataAttachments,
