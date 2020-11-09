@@ -50,7 +50,7 @@ type MergeRequest struct {
 
 func GetChangeLog(projectId int, iid int) {
     url := fmt.Sprintf("https://git.teko.vn/api/v4/projects/%d/merge_requests/%d/commits", projectId, iid)
-    bearer := "Bearer sDBohdHa-aCuiH4B8pXa"
+    bearer := "Bearer xxx"
     req, err := http.NewRequest(http.MethodGet, url, nil)
     req.Header.Add("Authorization", bearer)
     client := &http.Client{}
