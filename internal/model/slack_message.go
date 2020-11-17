@@ -5,7 +5,7 @@ import (
     "strings"
 )
 
-func Author (user User) (author Block) {
+func Author(user User) (author Block) {
     author.Type = "context"
     author.Elements = &[]Child{
         {
@@ -60,6 +60,37 @@ func ReturnAssignees(data []Assignee) Block {
         Text: &Child{
             Type: "mrkdwn",
             Text: "*Reviewers: *" + strings.Join(array, " "),
+        },
+    }
+}
+
+
+func Repo(data Project) Block {
+    if data.AvatarUrl == "" {
+        return Block{
+            Type: "context",
+            Elements: &[]Child{
+                {
+                    Type:   "plain_text",
+                    Text:   data.Name,
+                    Emoji:  true,
+                },
+            },
+        }
+    }
+    return Block{
+        Type: "context",
+        Elements: &[]Child{
+            {
+                Type:       "image",
+                ImageUrl:   data.AvatarUrl,
+                AltText:    "default alt",
+            },
+            {
+                Type:   "plain_text",
+                Text:   data.Name,
+                Emoji:  true,
+            },
         },
     }
 }

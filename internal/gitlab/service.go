@@ -14,6 +14,7 @@ func Handle(data model.MergeRequest) {
         Url:            model.Url(data.ObjectAttributes),
         Description:    model.Description(data.ObjectAttributes),
         Reviewers:      model.ReturnAssignees(data.Assignees),
+        Footer:         model.Repo(data.Project),
     }
     slack.SendMessage(result, projectId, objectAttributes)
 }

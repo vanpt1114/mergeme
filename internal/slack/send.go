@@ -10,6 +10,7 @@ import (
 //     "io/ioutil"
 
     "github.com/vanpt1114/mergeme/internal/model"
+    "github.com/vanpt1114/mergeme/config/config"
     "github.com/go-redis/redis/v8"
 )
 
@@ -20,10 +21,11 @@ type Message struct {
     Url         model.Block
     Description model.Block
     Reviewers   model.Block
+    Footer      model.Block
 }
 
 func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttributes) {
-    channel := CheckAllow(projectId)
+    channel := config.CheckAllow(projectId)
     rdb := redis.NewClient(&redis.Options{
         Addr:     os.Getenv("REDIS_HOST"),
         Password: "",
@@ -45,6 +47,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                     m.Url,
                     m.Description,
                     m.Reviewers,
+                    m.Footer,
                 },
             },
         }
@@ -97,6 +100,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                         m.Url,
                         m.Description,
                         m.Reviewers,
+                        m.Footer,
                     },
                 },
             }
@@ -144,6 +148,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                         Blocks: []model.Block{
                             m.Description,
                             m.Reviewers,
+                            m.Footer,
                         },
                     },
                 }
@@ -180,6 +185,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                             m.Url,
                             m.Description,
                             m.Reviewers,
+                            m.Footer,
                         },
                     },
                 }
@@ -217,6 +223,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                         m.Url,
                         m.Description,
                         m.Reviewers,
+                        m.Footer,
                     },
                 },
             }
@@ -259,6 +266,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                         m.Author,
                         m.Url,
                         mergedBy,
+                        m.Footer,
                     },
                 },
             }

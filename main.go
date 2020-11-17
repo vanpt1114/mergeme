@@ -11,6 +11,7 @@ import (
     gitlab  "github.com/vanpt1114/mergeme/internal/gitlab"
     model   "github.com/vanpt1114/mergeme/internal/model"
     slack   "github.com/vanpt1114/mergeme/internal/slack"
+    config  "github.com/vanpt1114/mergeme/config/config"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         fmt.Printf("ProjectID %v is not allowed\n", tmp.Project.Id)
         return
     }
-    fmt.Println(string(body))
+//     fmt.Println(string(body))
     r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
     decoder := json.NewDecoder(r.Body)

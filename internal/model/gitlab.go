@@ -5,8 +5,6 @@ import (
     "io/ioutil"
     "net/http"
     "encoding/json"
-
-//     slack "../slack"
 )
 
 type Commit struct {
@@ -22,9 +20,10 @@ type User struct {
 }
 
 type Project struct {
-    Id      int     `json:"id"`
-    Name    string  `json:"name"`
-    Path    string  `json:"path_with_namespace"`
+    Id          int     `json:"id"`
+    AvatarUrl   string  `json:"avatar_url"`
+    Name        string  `json:"name"`
+    Path        string  `json:"path_with_namespace"`
 }
 
 type LastCommit struct {
