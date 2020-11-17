@@ -27,16 +27,29 @@ type Project struct {
     Path    string  `json:"path_with_namespace"`
 }
 
+type LastCommit struct {
+    Id      string  `json:"id"`
+    Message string  `json:message`
+}
+
+type Assignee struct {
+    Username    string  `json:"username"`
+}
+
 type ObjectAttributes struct {
-    AssigneeId      int     `json:"assignee_id"`
-    AuthorId        int     `json:"author_id"`
-    CreatedAt       string  `json:"created_at"`
-    Description     string  `json:"description"`
-    Iid             int     `json:"iid"`
-    SourceBranch    string  `json:"source_branch"`
-    TargetBranch    string  `json:"target_branch"`
-    Title           string  `json:"title"`
-    Url             string  `json:"url"`
+    AssigneeId      int         `json:"assignee_id"`
+    AuthorId        int         `json:"author_id"`
+    CreatedAt       string      `json:"created_at"`
+    Description     string      `json:"description"`
+    Id              int         `json:"id"`
+    Iid             int         `json:"iid"`
+    SourceBranch    string      `json:"source_branch"`
+    TargetBranch    string      `json:"target_branch"`
+    Title           string      `json:"title"`
+    Url             string      `json:"url"`
+    LastCommit      LastCommit  `json:"last_commit"`
+    State           string      `json:"state"`
+    Action          string      `json:"action"`
 }
 
 type MergeRequest struct {
@@ -45,12 +58,13 @@ type MergeRequest struct {
     User                User                `json:"user"`
     Project             Project             `json:"project"`
     ObjectAttributes    ObjectAttributes    `json:"object_attributes"`
+    Assignees           []Assignee          `json:"assignees"`
 }
 
 
 func GetChangeLog(projectId int, iid int) {
     url := fmt.Sprintf("https://git.teko.vn/api/v4/projects/%d/merge_requests/%d/commits", projectId, iid)
-    bearer := "Bearer xxx"
+    bearer := "Bearer sDBohdHa-aCuiH4B8pXa"
     req, err := http.NewRequest(http.MethodGet, url, nil)
     req.Header.Add("Authorization", bearer)
     client := &http.Client{}

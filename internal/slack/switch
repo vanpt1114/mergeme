@@ -1,0 +1,13 @@
+switch case
+    open:
+        => post
+            . attach all
+    update:
+        => post with ts
+            . attach last_commit message
+        but if ts not found
+            => post
+                . attach all
+    merged:
+        => update with ts
+            . attach author, url, status merged

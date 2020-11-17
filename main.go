@@ -2,25 +2,42 @@ package main
 
 import (
     "fmt"
-    _"io/ioutil"
+    "io/ioutil"
     "log"
+    "bytes"
     "encoding/json"
     "net/http"
 
-    gitlab  "./internal/gitlab"
-    model   "./internal/model"
+    gitlab  "github.com/vanpt1114/mergeme/internal/gitlab"
+    model   "github.com/vanpt1114/mergeme/internal/model"
+    slack   "github.com/vanpt1114/mergeme/internal/slack"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
+    body, err := ioutil.ReadAll(r.Body)
+    defer r.Body.Close()
+    if err != nil {
+        panic(err)
+    }
+    var tmp model.MergeRequest
+    err = json.Unmarshal(body, &tmp)
+    if err != nil {
+        panic(err)
+    }
+    channel := slack.CheckAllow(tmp.Project.Id)
+    if channel == "" {
+        fmt.Printf("ProjectID %v is not allowed\n", tmp.Project.Id)
+        return
+    }
+    fmt.Println(string(body))
+    r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
     decoder := json.NewDecoder(r.Body)
     var t model.MergeRequest
-    fmt.Println(t)
-    err := decoder.Decode(&t)
+    err = decoder.Decode(&t)
     if err != nil {
         return
     }
-
-    fmt.Println(t)
     gitlab.Handle(t)
 }
 
