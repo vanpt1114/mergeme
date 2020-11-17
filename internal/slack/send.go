@@ -7,10 +7,9 @@ import (
     "context"
     "net/http"
     "os"
-//     "io/ioutil"
 
     "github.com/vanpt1114/mergeme/internal/model"
-    "github.com/vanpt1114/mergeme/config/config"
+    "github.com/vanpt1114/mergeme/config"
     "github.com/go-redis/redis/v8"
 )
 
@@ -210,7 +209,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                 defer resp.Body.Close()
             }
         }
-    case "merged":
+    case "merge":
         fmt.Println("merged")
         mergedBy := GetMergedBy(projectId, objectAttributes.Iid)
         ts, err := rdb.Get(ctx, redisKey).Result()
