@@ -10,7 +10,7 @@ import (
     "github.com/vanpt1114/mergeme/internal/model"
 )
 
-func GetMergedBy(projectId int, iid int) (mergedBy model.Block) {
+func GetMergedBy(projectId int, iid int) (mergedBy model.Block, author model.Block) {
     url := fmt.Sprintf("https://git.teko.vn/api/v4/projects/%d/merge_requests/%d", projectId, iid)
     bearer := "Bearer " + os.Getenv("GITLAB_TOKEN")
     req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -38,6 +38,20 @@ func GetMergedBy(projectId int, iid int) (mergedBy model.Block) {
         Text: fmt.Sprintf("*Merged by:* <@%s>", data.MergeBy.Username),
     }
 
-    return mergedBy
+    author.Type = "context"
+    author.Elements = &[]model.Child{
+        {
+            Type:       "image",
+            ImageUrl:   data.OriAuthor.AvatarUrl,
+            AltText:    "author image",
+        },
+        {
+            Type:   "plain_text",
+            Text:   data.OriAuthor.Name,
+            Emoji:  true,
+        },
+    }
+
+    return mergedBy, author
 
 }

@@ -211,14 +211,14 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
         }
     case "merge":
         fmt.Println("merged")
-        mergedBy := GetMergedBy(projectId, objectAttributes.Iid)
+        mergedBy, author := GetMergedBy(projectId, objectAttributes.Iid)
         ts, err := rdb.Get(ctx, redisKey).Result()
         if err == redis.Nil {
             dataAttachments := []model.Attachment{
                 model.Attachment{
                     Color: "#1542e6",
                     Blocks: []model.Block{
-                        m.Author,
+                        author,
                         m.Url,
                         m.Description,
                         m.Reviewers,
@@ -262,7 +262,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                 model.Attachment{
                     Color: "#1542e6",
                     Blocks: []model.Block{
-                        m.Author,
+                        author,
                         m.Url,
                         mergedBy,
                         m.Footer,
