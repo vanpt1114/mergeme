@@ -29,6 +29,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
         fmt.Printf("ProjectID %v is not allowed\n", tmp.Project.Id)
         return
     }
+    if tmp.ObjectAttributes.WIP == true {
+        fmt.Println("WIP is not allowed")
+        return
+    }
 //     fmt.Println(string(body))
     r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 

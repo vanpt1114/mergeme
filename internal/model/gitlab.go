@@ -49,6 +49,7 @@ type ObjectAttributes struct {
     LastCommit      LastCommit  `json:"last_commit"`
     State           string      `json:"state"`
     Action          string      `json:"action"`
+    WIP             bool        `json:"work_in_progress"`
 }
 
 type MergeRequest struct {
