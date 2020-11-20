@@ -53,5 +53,4 @@ func GetMergedBy(projectId int, iid int) (mergedBy model.Block, author model.Blo
     }
 
     return mergedBy, author
-
 }

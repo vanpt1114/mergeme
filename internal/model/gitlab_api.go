@@ -13,8 +13,8 @@ type OriAuthor struct {
 }
 
 type MergeRequestApi struct {
-    Id          int     `json:"id"`
-    Iid         int     `json:"iid"`
-    MergeBy     MergeBy `json:"merged_by"`
-    OriAuthor   OriAuthor  `json:"author"`
+    Id          int         `json:"id"`
+    Iid         int         `json:"iid"`
+    MergeBy     MergeBy     `json:"merged_by"`
+    OriAuthor   OriAuthor   `json:"author"`
 }

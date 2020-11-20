@@ -1,7 +1,7 @@
 package config
 
 var AllowProject = map[int]string{
-    1604: "C019QRNJ6DN",
+    1603: "C019QRNJ6DN",
 }
 
 func CheckAllow(projectId int) (channel string) {

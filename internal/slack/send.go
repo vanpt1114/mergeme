@@ -88,9 +88,11 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
             panic(err)
         }
     case "update":
-        fmt.Println("update")
+//         fmt.Println("update")
         ts, err := rdb.Get(ctx, redisKey).Result()
         if err == redis.Nil {
+            // Update event with no redis key
+            fmt.Println("Update event with no redis key")
             dataAttachments := []model.Attachment{
                 model.Attachment{
                     Color: "#1542e6",
@@ -134,7 +136,15 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
             if err != nil {
                 panic(err)
             }
+
+            lastCommit := objectAttributes.LastCommit.Id
+            err = rdb.Set(ctx, fmt.Sprintf("%s:lc", redisKey), lastCommit, 0).Err()
+            if err != nil {
+                panic(err)
+            }
         } else {
+            // Update event with new `last_commit` id (redis key exists)
+            fmt.Println("Update event with new `last_commit` id (redis key exists)")
             lastCommit := objectAttributes.LastCommit.Id
             lc, err := rdb.Get(ctx, fmt.Sprintf("%s:lc", redisKey)).Result()
             if err != nil {
@@ -147,7 +157,7 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                         Blocks: []model.Block{
                             m.Description,
                             m.Reviewers,
-                            m.Footer,
+//                             m.Footer,
                         },
                     },
                 }
@@ -207,6 +217,19 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
                     panic(err)
                 }
                 defer resp.Body.Close()
+
+                decoder := json.NewDecoder(resp.Body)
+                var t model.SlackResponsePayload
+                err = decoder.Decode(&t)
+                if err != nil {
+                    panic(err)
+                }
+                defer resp.Body.Close()
+
+                err = rdb.Set(ctx, redisKey, t.Ts, 0).Err()
+                if err != nil {
+                    panic(err)
+                }
             }
         }
     case "merge":
