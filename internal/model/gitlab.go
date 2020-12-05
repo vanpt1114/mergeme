@@ -2,9 +2,6 @@ package model
 
 import (
     "fmt"
-    "io/ioutil"
-    "net/http"
-    "encoding/json"
 )
 
 type Commit struct {
@@ -61,32 +58,6 @@ type MergeRequest struct {
     Assignees           []Assignee          `json:"assignees"`
 }
 
-
-func GetChangeLog(projectId int, iid int) {
-    url := fmt.Sprintf("https://git.teko.vn/api/v4/projects/%d/merge_requests/%d/commits", projectId, iid)
-    bearer := "Bearer sDBohdHa-aCuiH4B8pXa"
-    req, err := http.NewRequest(http.MethodGet, url, nil)
-    req.Header.Add("Authorization", bearer)
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        return
-    }
-    defer resp.Body.Close()
-
-    var data []Commit
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        return
-    }
-
-    err = json.Unmarshal([]byte(body), &data)
-    if err != nil {
-        return
-    }
-
-    fmt.Println(data)
-}
 
 func Handle(data MergeRequest) {
     fmt.Println(data)
