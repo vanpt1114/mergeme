@@ -2,8 +2,9 @@ package model
 
 
 type SlackResponsePayload struct {
-    Ok  bool    `json:"ok"`
-    Ts  string  `json:"ts"`
+    Ok      bool    `json:"ok"`
+    Ts      string  `json:"ts,omitempty"`
+    Error   string  `json:"error,omitempty"`
 }
 
 

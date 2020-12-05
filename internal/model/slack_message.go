@@ -3,7 +3,18 @@ package model
 import (
     "fmt"
     "strings"
+    "regexp"
 )
+
+var Pattern = map[string]string{
+    `\-\s\[x\]`:    ":todo_done:",
+    `\-\s\[\s\]`:   ":todo:",
+    `\-\s\[\+\]`:   ":todo_done:",
+}
+
+var Capture = map[string]string{
+    `#{1,6}\s(?P<Title>[0-9a-zA-Z-\s]+)\n`: "",
+}
 
 func Author(user User) (author Block) {
     author.Type = "context"
@@ -33,21 +44,14 @@ func Url(data ObjectAttributes) (url Block) {
 }
 
 func Description(data ObjectAttributes) (desc Block) {
+    description := SlackMarkDown(data.Description)
     desc.Type = "section"
     desc.Text = &Child{
         Type: "mrkdwn",
-        Text: "*Description:*\n" + data.Description,
+//         Text: "*Description:*\n" + description,
+        Text: description,
     }
     return desc
-}
-
-func Reviewers() (reviewers Block) {
-    reviewers.Type = "section"
-    reviewers.Text = &Child{
-        Type: "mrkdwn",
-        Text: "*Reviewers:* " + "<@van.pt> <@van.pt>",
-    }
-    return reviewers
 }
 
 func ReturnAssignees(data []Assignee) Block {
@@ -93,4 +97,21 @@ func Repo(data Project) Block {
             },
         },
     }
+}
+
+func SlackMarkDown(data string) string {
+    for k, v := range Pattern {
+        re := regexp.MustCompile(k)
+        data = re.ReplaceAllString(data, v)
+    }
+    // Replace markdown Heading
+    for k, _ := range Capture {
+        re := regexp.MustCompile(k)
+        tmp := re.FindAllStringSubmatch(data, -1)
+        for _, val := range tmp {
+            re := regexp.MustCompile(string(val[0]))
+            data = re.ReplaceAllString(data, "*" + string(val[1]) + "*\n")
+        }
+    }
+    return data
 }

@@ -10,8 +10,10 @@ import (
     "github.com/vanpt1114/mergeme/internal/model"
 )
 
+var GITLAB_URL = os.Getenv("GITLAB_URL")
+
 func GetMergedBy(projectId int, iid int) (mergedBy model.Block, author model.Block) {
-    url := fmt.Sprintf("https://git.teko.vn/api/v4/projects/%d/merge_requests/%d", projectId, iid)
+    url := fmt.Sprintf("%s/api/v4/projects/%d/merge_requests/%d", GITLAB_URL, projectId, iid)
     bearer := "Bearer " + os.Getenv("GITLAB_TOKEN")
     req, err := http.NewRequest(http.MethodGet, url, nil)
     req.Header.Add("Authorization", bearer)
@@ -53,4 +55,24 @@ func GetMergedBy(projectId int, iid int) (mergedBy model.Block, author model.Blo
     }
 
     return mergedBy, author
+}
+
+func UpdateSlackTs(r, ts string) {
+    err := rdb.Set(ctx, r, ts, 0).Err()
+    if err != nil {
+        panic(err)
+    }
+}
+
+func DecodeSlackResponse(r *http.Response) string {
+    decoder := json.NewDecoder(r.Body)
+    var t model.SlackResponsePayload
+    err := decoder.Decode(&t)
+    if err != nil {
+        panic(err)
+    }
+    if t.Ok != true {
+        panic(t.Error)
+    }
+    return t.Ts
 }
