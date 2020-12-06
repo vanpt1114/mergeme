@@ -5,10 +5,11 @@ A simple app that will route Merge request events on gitlab to different channel
 ![mergeme](images/open_event.png "merge me UI")
 ![mergeme](images/merge_event.png "merge me UI")
 
-### Usage: ###
+### Usage:
 - Define your project ID along with the slack channel that you want to route to message to in config/allow.go
+- Configure your project's Settings in Gitlab, make an webhook that push merge request event to the MergeMe server URL.
 
-*Prerequisites:*
+### Prerequisites:
 - Redis for caching gitlab merge request ID
 - Slack API Token with bot:write privilege.
 - Gitlab read api token.
