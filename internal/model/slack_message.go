@@ -14,7 +14,7 @@ var Pattern = map[string]string{
 
 var Bold = map[string]string{
     `\*\*\*([0-9a-zA-Z-./#: ]+)\*\*\*`: "*_", // Bold & Italic
-    `\*([0-9a-zA-Z-./#: ]+)\*`: "_", // Italic
+//     `\*([0-9a-zA-Z-./#: ]+)\*`: "_", // Italic
     `\*\*([0-9a-zA-Z-./#: ]+)\*\*`: "*", // Bold
     `\_\_([0-9a-zA-Z-./#: ]+)\_\_`: "*", // Bold
     `#{1,6}\s([0-9a-zA-Z-./#: ]+)`: "*", // Heading
