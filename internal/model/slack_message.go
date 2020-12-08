@@ -60,8 +60,7 @@ func Description(data ObjectAttributes) (desc Block) {
     desc.Type = "section"
     desc.Text = &Child{
         Type: "mrkdwn",
-//         Text: "*Description:*\n" + description,
-        Text: description,
+        Text: description + " ",
     }
     return desc
 }
