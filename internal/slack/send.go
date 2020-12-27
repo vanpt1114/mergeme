@@ -1,16 +1,13 @@
 package slack
 
 import (
-    "fmt"
-//     "bytes"
-//     "encoding/json"
     "context"
-//     "net/http"
+    "fmt"
     "os"
 
-    "github.com/vanpt1114/mergeme/internal/model"
-    "github.com/vanpt1114/mergeme/config"
     "github.com/go-redis/redis/v8"
+    "github.com/vanpt1114/mergeme/config"
+    "github.com/vanpt1114/mergeme/internal/model"
 )
 
 var ctx = context.Background()
@@ -18,12 +15,17 @@ var ctx = context.Background()
 var rdb = redis.NewClient(&redis.Options{
     Addr:     os.Getenv("REDIS_HOST"),
     Password: "",
-    DB:       0,
+    DB:       1,
 })
 
 var url = "https://slack.com/api/chat.postMessage"
 var slack_update = "https://slack.com/api/chat.update"
 var bearer = "Bearer " + os.Getenv("SLACK_TOKEN")
+const (
+	OpenMRColor = "#108548"
+    MergedColor = "#1F75CB"
+    ClosedColor = "#DD2B0E"
+)
 
 type Message struct {
     Author      model.Block
@@ -47,6 +49,6 @@ func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttribut
     case "close":
         Close(&m, redisKey, &objectAttributes, channel)
     case "merge":
-        Merge(&m, redisKey, &objectAttributes, channel, projectId)
+        Merge(&m, redisKey, &objectAttributes, projectId, channel)
     }
 }

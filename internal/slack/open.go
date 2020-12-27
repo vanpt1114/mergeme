@@ -1,10 +1,10 @@
 package slack
 
 import (
-    "fmt"
-    "net/http"
     "bytes"
     "encoding/json"
+    "fmt"
+    "net/http"
 
     "github.com/vanpt1114/mergeme/internal/model"
 )
@@ -12,7 +12,7 @@ import (
 func Open(m *Message, r string, o *model.ObjectAttributes, channel string) {
     dataAttachments := []model.Attachment{
         model.Attachment{
-            Color: "#1542e6",
+            Color: OpenMRColor,
             Blocks: []model.Block{
                 m.Author,
                 m.Url,

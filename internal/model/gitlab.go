@@ -1,9 +1,5 @@
 package model
 
-import (
-    "fmt"
-)
-
 type Commit struct {
     ShortId     string  `json:"short_id"`
     Message     string  `json:"message"`
@@ -58,7 +54,3 @@ type MergeRequest struct {
     Assignees           []Assignee          `json:"assignees"`
 }
 
-
-func Handle(data MergeRequest) {
-    fmt.Println(data)
-}
