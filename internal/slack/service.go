@@ -1,10 +1,10 @@
 package slack
 
 import (
-    "fmt"
-    "net/http"
-    "io/ioutil"
     "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "net/http"
     "os"
 
     "github.com/vanpt1114/mergeme/internal/model"

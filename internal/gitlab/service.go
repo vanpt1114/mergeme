@@ -1,7 +1,6 @@
 package gitlab
 
 import (
-
     "github.com/vanpt1114/mergeme/internal/model"
     "github.com/vanpt1114/mergeme/internal/slack"
 )

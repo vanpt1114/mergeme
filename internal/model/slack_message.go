@@ -2,14 +2,18 @@ package model
 
 import (
     "fmt"
-    "strings"
+    "html"
     "regexp"
+    "strings"
 )
 
 var Pattern = map[string]string{
     `\-\s\[x\]`:    ":todo_done:",
     `\-\s\[\s\]`:   ":todo:",
     `\-\s\[\+\]`:   ":todo_done:",
+    `\*\s\[x\]`:    ":todo_done:",
+    `\*\s\[\s\]`:   ":todo:",
+    //`(\* ?[ a-zA-Z0-9!@#$%^&*()+.,\-/\x60=:'"<>{}|\\;]+)`: "- ",
 }
 
 var Bold = map[string]string{
@@ -46,7 +50,7 @@ func Author(user User) (author Block) {
 }
 
 func Url(data ObjectAttributes) (url Block) {
-    text := fmt.Sprintf("<%s|*#%d: %s*>\n`%s` ➜ `%s`", data.Url, data.Iid, data.Title, data.SourceBranch, data.TargetBranch)
+    text := fmt.Sprintf("<%s|*#%d: %s*>\n`%s` ➜ `%s`", data.Url, data.Iid, html.EscapeString(data.Title), data.SourceBranch, data.TargetBranch)
     url.Type = "section"
     url.Text = &Child{
         Type: "mrkdwn",
@@ -127,7 +131,7 @@ func SlackMarkDown(data string) string {
     }
 
     // Replace markdown Hyperlink
-    re := regexp.MustCompile(`\[([\s0-9a-zA-Z-.]+)\]\((https?:\/\/[0-9a-zA-Z\-./#]+)\)`)
+    re := regexp.MustCompile(`\[([a-zA-Z0-9!@#$%^&*.\-/?=+]+)\]\((https?:\/\/[a-zA-Z0-9!@#$%^&*.\-/?=+]+)\)`)
 	result := re.FindAllStringSubmatch(data, -1)
 	for _, val := range result {
 		re := regexp.MustCompile(regexp.QuoteMeta(val[0]))

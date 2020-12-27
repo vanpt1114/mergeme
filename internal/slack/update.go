@@ -1,13 +1,13 @@
 package slack
 
 import (
-    "fmt"
-    "net/http"
     "bytes"
     "encoding/json"
+    "fmt"
+    "net/http"
 
-    "github.com/vanpt1114/mergeme/internal/model"
     "github.com/go-redis/redis/v8"
+    "github.com/vanpt1114/mergeme/internal/model"
 )
 
 func Update(m *Message, r string, o *model.ObjectAttributes, channel string) {
@@ -16,7 +16,7 @@ func Update(m *Message, r string, o *model.ObjectAttributes, channel string) {
         // "[Update_1] Redis key doesn't exist"
         dataAttachments := []model.Attachment{
             model.Attachment{
-                Color: "#1542e6",
+                Color: OpenMRColor,
                 Blocks: []model.Block{
                     m.Author,
                     m.Url,
@@ -28,7 +28,7 @@ func Update(m *Message, r string, o *model.ObjectAttributes, channel string) {
         }
 
         dataToSend, _ := json.Marshal(&model.SlackPayload{
-            Channel:        "C019QRNJ6DN",
+            Channel:        channel,
             Username:       "MergeMe",
             IconEmoji:      ":buff-mr:",
             Attachments:    dataAttachments,
@@ -63,7 +63,7 @@ func Update(m *Message, r string, o *model.ObjectAttributes, channel string) {
                 fmt.Println("[Update_2] last_commit does not change, so re-update thread")
                 dataAttachments := []model.Attachment{
                     model.Attachment{
-                        Color: "#1542e6",
+                        Color: OpenMRColor,
                         Blocks: []model.Block{
                             m.Author,
                             m.Url,
@@ -98,7 +98,7 @@ func Update(m *Message, r string, o *model.ObjectAttributes, channel string) {
                 fmt.Println("[Update_2] last_commit is different, so make a post with sub-message")
                 dataAttachments := []model.Attachment{
                     model.Attachment{
-                        Color: "#1542e6",
+                        Color: OpenMRColor,
                         Blocks: []model.Block{
                             m.Author,
                             m.Reviewers,

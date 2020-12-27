@@ -1,24 +1,22 @@
 package slack
 
 import (
-//     "fmt"
-    "net/http"
     "bytes"
     "encoding/json"
+    "net/http"
 
-    "github.com/vanpt1114/mergeme/internal/model"
     "github.com/go-redis/redis/v8"
+    "github.com/vanpt1114/mergeme/internal/model"
 )
 
-func Merge(m *Message, r string, o *model.ObjectAttributes, channel string, projectId int) {
+func Merge(m *Message, r string, o *model.ObjectAttributes, projectId int, channel string) {
     mergedBy, author := GetMergedBy(projectId, o.Iid)
     dataAttachments := []model.Attachment{
         model.Attachment{
-            Color: "#030321",
+            Color: MergedColor,
             Blocks: []model.Block{
                 author,
                 m.Url,
-//                 m.Description,
                 mergedBy,
                 m.Footer,
             },
