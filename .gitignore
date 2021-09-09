@@ -1,0 +1,6 @@
+.idea/
+vendor/
+export.example
+example.env
+.gitlab-ci.yml
+
