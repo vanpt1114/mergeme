@@ -2,7 +2,8 @@ package model
 
 import (
     "fmt"
-    "html"
+	"github.com/xanzy/go-gitlab"
+	"html"
     "regexp"
 )
 
@@ -34,25 +35,33 @@ func Reverse(s string) string {
     return string(runes)
 }
 
-func Author(user User) (author Block) {
+func Author(user *gitlab.EventUser) (author Block) {
     author.Type = "context"
     author.Elements = &[]Child{
         {
             Type:       "image",
-            ImageUrl:   user.AvatarUrl,
+            ImageUrl:   user.AvatarURL,
             AltText:    "default alt",
         },
         {
             Type:   "plain_text",
-            Text:   fmt.Sprintf("<@%s>", user.User),
+            Text:   fmt.Sprintf("<@%s>", user.Username),
             Emoji:  true,
         },
     }
     return author
 }
 
-func Url(data ObjectAttributes) (url Block) {
-    text := fmt.Sprintf("<%s|*#%d: %s*>\n`%s` ➜ `%s`", data.Url, data.Iid, html.UnescapeString(data.Title), data.SourceBranch, data.TargetBranch)
+func Url(data gitlab.MergeEvent) (url Block) {
+    text := fmt.Sprintf(
+        "<%s|*#%d: %s*>\n`%s` ➜ `%s`",
+        data.ObjectAttributes.URL,
+        data.ObjectAttributes.IID,
+        html.UnescapeString(data.ObjectAttributes.Title),
+        data.ObjectAttributes.SourceBranch,
+        data.ObjectAttributes.TargetBranch,
+        )
+    
     url.Type = "section"
     url.Text = &Child{
         Type: "mrkdwn",
@@ -61,8 +70,8 @@ func Url(data ObjectAttributes) (url Block) {
     return url
 }
 
-func Description(data ObjectAttributes) (desc Block) {
-    description := SlackMarkDown(data.Description)
+func Description(data gitlab.MergeEvent) (desc Block) {
+    description := SlackMarkDown(data.ObjectAttributes.Description)
     desc.Type = "section"
     desc.Text = &Child{
         Type: "mrkdwn",
@@ -71,14 +80,14 @@ func Description(data ObjectAttributes) (desc Block) {
     return desc
 }
 
-func Repo(data Project) Block {
-    if data.AvatarUrl == "" {
+func Repo(data gitlab.MergeEvent) Block {
+    if data.Project.AvatarURL== "" {
         return Block{
             Type: "context",
             Elements: &[]Child{
                 {
                     Type:   "plain_text",
-                    Text:   data.Name,
+                    Text:   data.Project.Name,
                     Emoji:  true,
                 },
             },
@@ -89,12 +98,12 @@ func Repo(data Project) Block {
         Elements: &[]Child{
             {
                 Type:       "image",
-                ImageUrl:   data.AvatarUrl,
+                ImageUrl:   data.Project.AvatarURL,
                 AltText:    "default alt",
             },
             {
                 Type:   "plain_text",
-                Text:   data.Name,
+                Text:   data.Project.Name,
                 Emoji:  true,
             },
         },

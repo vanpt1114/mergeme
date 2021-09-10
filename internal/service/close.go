@@ -1,23 +1,32 @@
-package slack
+package service
 
 import (
     "bytes"
     "encoding/json"
+    "github.com/xanzy/go-gitlab"
     "net/http"
 
     "github.com/go-redis/redis/v8"
     "github.com/vanpt1114/mergeme/internal/model"
 )
 
-func Merge(m *Message, r string, o *model.ObjectAttributes, projectId int, channel string) {
-    mergedBy, author := GetMergedBy(projectId, o.Iid)
+
+
+func (s *Service) Close(m *Message, r string, o *gitlab.MergeEvent, channel string) {
+    var closeBlock model.Block
+    closeBlock.Type = "section"
+    closeBlock.Text = &model.Child{
+        Type: "mrkdwn",
+        Text: "*Closed*",
+    }
     dataAttachments := []model.Attachment{
-        model.Attachment{
-            Color: MergedColor,
+        {
+            Color: ClosedColor,
             Blocks: []model.Block{
-                author,
+                m.Author,
                 m.Url,
-                mergedBy,
+                m.Description,
+                closeBlock,
                 m.Footer,
             },
         },
@@ -25,7 +34,7 @@ func Merge(m *Message, r string, o *model.ObjectAttributes, projectId int, chann
 
     timestamp, err := rdb.Get(ctx, r).Result()
     if err == redis.Nil {
-        // Redis key does not exist, rarely happen
+        // Redis key does not exists => Post new message
         dataToSend, _ := json.Marshal(&model.SlackPayload{
             Channel:        channel,
             Username:       "MergeMe",
@@ -36,19 +45,19 @@ func Merge(m *Message, r string, o *model.ObjectAttributes, projectId int, chann
         req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataToSend))
         req.Header.Add("Authorization", bearer)
         req.Header.Add("Content-Type", "application/json")
-        client := &http.Client{}
 
+        client := &http.Client{}
         resp, err := client.Do(req)
         if err != nil {
             panic(err)
         }
-        defer resp.Body.Close()
+
         ts := DecodeSlackResponse(resp)
         UpdateSlackTs(r, ts)
     } else if err != nil {
         panic(err)
     } else {
-        // Redis key exists, so make an update to the existing thread
+        // Redis key exists, so make an Update to existing thread
         dataToSend, _ := json.Marshal(&model.SlackPayload{
             Channel:        channel,
             Ts:             timestamp,
@@ -56,11 +65,12 @@ func Merge(m *Message, r string, o *model.ObjectAttributes, projectId int, chann
             IconEmoji:      ":buff-mr:",
             Attachments:    dataAttachments,
         })
+
         req, err := http.NewRequest(http.MethodPost, slack_update, bytes.NewBuffer(dataToSend))
         req.Header.Add("Authorization", bearer)
         req.Header.Add("Content-Type", "application/json")
-        client := &http.Client{}
 
+        client := &http.Client{}
         resp, err := client.Do(req)
         if err != nil {
             panic(err)

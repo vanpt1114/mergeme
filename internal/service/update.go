@@ -1,17 +1,19 @@
-package slack
+package service
 
 import (
     "bytes"
     "encoding/json"
     "fmt"
+    "github.com/xanzy/go-gitlab"
     "net/http"
 
     "github.com/go-redis/redis/v8"
     "github.com/vanpt1114/mergeme/internal/model"
 )
 
-func Update(m *Message, r string, o *model.ObjectAttributes, projectId int, channel string) {
-    reviewers := GetReviewers(projectId, o.Iid)
+func (s *Service) Update(m *Message, r string, o *gitlab.MergeEvent, projectId int, channel string) {
+    reviewers := s.GetReviewers(projectId, o.ObjectAttributes.IID)
+    fmt.Println(reviewers)
     timestamp, err := rdb.Get(ctx, r).Result()
     if err == redis.Nil {
         // "[Update_1] Redis key doesn't exist"
@@ -22,16 +24,17 @@ func Update(m *Message, r string, o *model.ObjectAttributes, projectId int, chan
                     m.Author,
                     m.Url,
                     m.Description,
+                    reviewers,
                     m.Footer,
                 },
             },
         }
 
         dataToSend, _ := json.Marshal(&model.SlackPayload{
-            Channel:        channel,
-            Username:       "MergeMe",
-            IconEmoji:      BotIcon,
-            Attachments:    dataAttachments,
+            Channel:     channel,
+            Username:    "MergeMe",
+            IconEmoji:   BotIcon,
+            Attachments: dataAttachments,
         })
 
         req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataToSend))
@@ -48,7 +51,7 @@ func Update(m *Message, r string, o *model.ObjectAttributes, projectId int, chan
 
         ts := DecodeSlackResponse(resp)
         UpdateSlackTs(r, ts)
-        UpdateSlackTs(fmt.Sprintf("%s:lc", r), o.LastCommit.Id)
+        UpdateSlackTs(fmt.Sprintf("%s:lc", r), o.ObjectAttributes.LastCommit.ID)
     } else if err != nil {
         panic("[Update_1] Err")
     } else {
@@ -59,7 +62,7 @@ func Update(m *Message, r string, o *model.ObjectAttributes, projectId int, chan
         } else if err != nil {
             panic("[Update_2] Err")
         } else {
-            if o.LastCommit.Id == lastCommit {
+            if o.ObjectAttributes.LastCommit.ID == lastCommit {
                 fmt.Println("[Update_2] last_commit does not change, so re-update thread")
                 dataAttachments := []model.Attachment{
                     {
@@ -75,11 +78,11 @@ func Update(m *Message, r string, o *model.ObjectAttributes, projectId int, chan
                 }
 
                 dataToSend, _ := json.Marshal(&model.SlackPayload{
-                    Channel:        channel,
-                    Ts:             timestamp,
-                    Username:       "MergeMe",
-                    IconEmoji:      BotIcon,
-                    Attachments:    dataAttachments,
+                    Channel:     channel,
+                    Ts:          timestamp,
+                    Username:    "MergeMe",
+                    IconEmoji:   BotIcon,
+                    Attachments: dataAttachments,
                 })
 
                 req, err := http.NewRequest(http.MethodPost, slack_update, bytes.NewBuffer(dataToSend))
@@ -107,11 +110,11 @@ func Update(m *Message, r string, o *model.ObjectAttributes, projectId int, chan
                 }
 
                 dataToSend, _ := json.Marshal(&model.SlackPayload{
-                    Channel:        channel,
-                    ThreadTs:       timestamp,
-                    Username:       "MergeMe",
-                    IconEmoji:      BotIcon,
-                    Attachments:    dataAttachments,
+                    Channel:     channel,
+                    ThreadTs:    timestamp,
+                    Username:    "MergeMe",
+                    IconEmoji:   BotIcon,
+                    Attachments: dataAttachments,
                 })
 
                 req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataToSend))

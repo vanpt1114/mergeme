@@ -4,45 +4,47 @@ import (
     "bytes"
     "encoding/json"
     "fmt"
+    "github.com/vanpt1114/mergeme/config"
+    "github.com/xanzy/go-gitlab"
     "io/ioutil"
     "log"
     "net/http"
+    "os"
 
-    config "github.com/vanpt1114/mergeme/config"
-    gitlab "github.com/vanpt1114/mergeme/internal/gitlab"
-    model "github.com/vanpt1114/mergeme/internal/model"
+    "github.com/vanpt1114/mergeme/internal/service"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
+    GITLAB_TOKEN := os.Getenv("GITLAB_TOKEN")
+    GITLAB_URL := os.Getenv("GITLAB_URL")
     body, err := ioutil.ReadAll(r.Body)
     defer r.Body.Close()
     if err != nil {
         panic(err)
     }
-    var tmp model.MergeRequest
+    var tmp gitlab.MergeEvent
     err = json.Unmarshal(body, &tmp)
     if err != nil {
         panic(err)
     }
-    channel := config.CheckAllow(tmp.Project.Id)
+    channel := config.CheckAllow(tmp.Project.ID)
     if channel == "" {
-        fmt.Printf("ProjectID %v is not allowed\n", tmp.Project.Id)
-        return
+       fmt.Printf("ProjectID %v is not allowed\n", tmp.Project.ID)
+       return
     }
-    if tmp.ObjectAttributes.WIP == true {
-        fmt.Println("WIP is not allow")
-        return
+    if tmp.ObjectAttributes.WorkInProgress == true {
+       fmt.Println("WIP is not allow")
+       return
     }
-    //fmt.Println(string(body))
     r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-
     decoder := json.NewDecoder(r.Body)
-    var t model.MergeRequest
+    var t gitlab.MergeEvent
     err = decoder.Decode(&t)
     if err != nil {
-        return
+       return
     }
-    gitlab.Handle(t)
+    svc := service.NewService(GITLAB_TOKEN, GITLAB_URL)
+    svc.Handle(t)
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
