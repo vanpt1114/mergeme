@@ -1,4 +1,4 @@
-package slack
+package service
 
 import (
     "context"
@@ -8,6 +8,8 @@ import (
     "github.com/go-redis/redis/v8"
     "github.com/vanpt1114/mergeme/config"
     "github.com/vanpt1114/mergeme/internal/model"
+    //"github.com/vanpt1114/mergeme/internal/service"
+    "github.com/xanzy/go-gitlab"
 )
 
 var ctx = context.Background()
@@ -21,6 +23,9 @@ var rdb = redis.NewClient(&redis.Options{
 var url = "https://slack.com/api/chat.postMessage"
 var slack_update = "https://slack.com/api/chat.update"
 var bearer = "Bearer " + os.Getenv("SLACK_TOKEN")
+var gitlab_token = os.Getenv("GITLAB_TOKEN")
+var gitlab_url = os.Getenv("GITLAB_URL")
+
 const (
 	OpenMRColor = "#108548"
     MergedColor = "#1F75CB"
@@ -36,19 +41,19 @@ type Message struct {
 }
 
 
-func SendMessage(m Message, projectId int, objectAttributes model.ObjectAttributes) {
+func (s *Service) SendMessage(m Message, projectId int, objectAttributes gitlab.MergeEvent) {
     channel := config.CheckAllow(projectId)
-    redisKey := fmt.Sprintf("gitlab:mr:%d", objectAttributes.Id)
+    redisKey := fmt.Sprintf("service:mr:%d", objectAttributes.ObjectAttributes.ID)
 
     // Switch-case by event `action` field
-    switch objectAttributes.Action {
+    switch objectAttributes.ObjectAttributes.Action {
     case "open":
-        Open(&m, redisKey, &objectAttributes, projectId, channel)
+        s.Open(&m, redisKey, &objectAttributes, projectId, channel)
     case "update":
-        Update(&m, redisKey, &objectAttributes, projectId, channel)
+        s.Update(&m, redisKey, &objectAttributes, projectId, channel)
     case "close":
-        Close(&m, redisKey, &objectAttributes, channel)
+        s.Close(&m, redisKey, &objectAttributes, channel)
     case "merge":
-        Merge(&m, redisKey, &objectAttributes, projectId, channel)
+        s.Merge(&m, redisKey, &objectAttributes, projectId, channel)
     }
 }

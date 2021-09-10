@@ -11,6 +11,7 @@ var AllowProject = map[int]string{
     1038: "C019QRNJ6DN", // workloads develop, channel #new-test-alerts, test
     1067: "C019QRNJ6DN", // workloads staging, channel #new-test-alerts, test
     1068: "C019QRNJ6DN", // workloads production, channel #new-test-alerts
+    16307281: "C015ZH0JUDC",
 }
 
 func CheckAllow(projectId int) (channel string) {
