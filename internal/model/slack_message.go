@@ -5,6 +5,8 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"html"
     "regexp"
+
+    "github.com/slack-go/slack"
 )
 
 const (
@@ -33,6 +35,22 @@ func Reverse(s string) string {
         runes[i], runes[j] = runes[j], runes[i]
     }
     return string(runes)
+}
+
+func NewAuthor(user *gitlab.EventUser) (author slack.Blocks) {
+    author.BlockSet = []slack.Block{
+        slack.ImageBlock{
+            Type:       "image",
+            ImageURL:   user.AvatarURL,
+            AltText:    "default alt",
+        },
+        slack.TextBlockObject{
+            Type:       "plain_text",
+            Text:       fmt.Sprintf("<@%s>", user.Username),
+            Emoji:      true,
+        },
+    }
+    return author
 }
 
 func Author(user *gitlab.EventUser) (author Block) {

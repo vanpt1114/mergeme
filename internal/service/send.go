@@ -3,12 +3,12 @@ package service
 import (
     "context"
     "fmt"
+    "github.com/slack-go/slack"
     "os"
 
     "github.com/go-redis/redis/v8"
     "github.com/vanpt1114/mergeme/config"
     "github.com/vanpt1114/mergeme/internal/model"
-    //"github.com/vanpt1114/mergeme/internal/service"
     "github.com/xanzy/go-gitlab"
 )
 
@@ -38,6 +38,10 @@ type Message struct {
     Url         model.Block
     Description model.Block
     Footer      model.Block
+}
+
+type NewMessage struct {
+    Author      slack.Block
 }
 
 
