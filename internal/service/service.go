@@ -2,13 +2,14 @@ package service
 
 import (
     "fmt"
-    "github.com/slack-go/slack"
+    "github.com/vanpt1114/mergeme/config"
     "github.com/vanpt1114/mergeme/internal/model"
-    "github.com/go-redis/redis/v8"
-    "github.com/xanzy/go-gitlab"
     "strconv"
-    "os"
     "strings"
+
+    "github.com/go-redis/redis/v8"
+    "github.com/slack-go/slack"
+    "github.com/xanzy/go-gitlab"
 )
 
 type Service struct {
@@ -28,22 +29,22 @@ func (s *Service) Handle(data gitlab.MergeEvent) {
     s.SendMessage(msgBlock, projectID, data)
 }
 
-func NewService(token, baseURL, slackToken string) *Service {
-    gl, err := gitlab.NewClient(token, gitlab.WithBaseURL(baseURL))
+func NewService(cfg *config.Config) *Service {
+    gl, err := gitlab.NewClient(cfg.Gitlab.Token, gitlab.WithBaseURL(cfg.Gitlab.URL))
     if err != nil {
         panic(err)
     }
-    slackClient := slack.New(slackToken)
+    slackClient := slack.New(cfg.SlackToken)
     if err != nil {
         panic(err)
     }
-    redisDB, err := strconv.Atoi(os.Getenv("REDIS_DB"))
+    redisDB, err := strconv.Atoi(cfg.Redis.DB)
     if err != nil {
         panic(err)
     }
     rdb := redis.NewClient(&redis.Options{
-        Addr:     os.Getenv("REDIS_HOST"),
-        Password: "",
+        Addr:     cfg.Redis.Host,
+        Password: cfg.Redis.Password,
         DB:       redisDB,
     })
     server := &Service{
@@ -53,7 +54,6 @@ func NewService(token, baseURL, slackToken string) *Service {
     }
     return server
 }
-
 func (s *Service) UpdateSlackTs(r, ts string) {
     err := s.redis.Set(ctx, r, ts, 0).Err()
     if err != nil {
