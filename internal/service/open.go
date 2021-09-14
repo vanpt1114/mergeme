@@ -15,9 +15,7 @@ func (s *Service) Open(m Message, r string, o *gitlab.MergeEvent, projectId int,
         m.Footer,
     }
 
-    slackClient := slack.New(bearer)
-
-    _, respTS, err := slackClient.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
+    _, respTS, err := s.slack.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
 
     if err != nil {
         panic(err)

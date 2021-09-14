@@ -10,6 +10,7 @@ import (
 
 type Service struct {
     gitlab  *gitlab.Client
+    slack   *slack.Client
 }
 
 func (s *Service) Handle(data gitlab.MergeEvent) {
@@ -23,13 +24,18 @@ func (s *Service) Handle(data gitlab.MergeEvent) {
     s.SendMessage(msgBlock, projectID, data)
 }
 
-func NewService(token, baseURL string) *Service {
+func NewService(token, baseURL, slackToken string) *Service {
     gl, err := gitlab.NewClient(token, gitlab.WithBaseURL(baseURL))
+    if err != nil {
+        panic(err)
+    }
+    slackClient := slack.New(slackToken)
     if err != nil {
         panic(err)
     }
     server := &Service{
         gitlab: gl,
+        slack: slackClient,
     }
     return server
 }

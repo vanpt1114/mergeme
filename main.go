@@ -17,6 +17,7 @@ import (
 func handler(w http.ResponseWriter, r *http.Request) {
     GITLAB_TOKEN := os.Getenv("GITLAB_TOKEN")
     GITLAB_URL := os.Getenv("GITLAB_URL")
+    SLACK_TOKEN := os.Getenv("SLACK_TOKEN")
     body, err := ioutil.ReadAll(r.Body)
     defer r.Body.Close()
     if err != nil {
@@ -43,7 +44,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
        return
     }
-    svc := service.NewService(GITLAB_TOKEN, GITLAB_URL)
+    svc := service.NewService(GITLAB_TOKEN, GITLAB_URL, SLACK_TOKEN)
     svc.Handle(t)
 }
 

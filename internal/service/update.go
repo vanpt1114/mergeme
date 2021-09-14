@@ -17,11 +17,10 @@ func (s *Service) Update(m Message, r string, mr *gitlab.MergeEvent, projectID i
 	}
 
 	timestamp, err := rdb.Get(ctx, r).Result()
-	slackClient := slack.New(bearer)
 
 	if err == redis.Nil {
 		// "[Update_1] Redis key doesn't exist"
-		_, respTS, err := slackClient.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
+		_, respTS, err := s.slack.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
 
 		if err != nil {
 			panic(err)
@@ -40,13 +39,13 @@ func (s *Service) Update(m Message, r string, mr *gitlab.MergeEvent, projectID i
 		} else {
 			if mr.ObjectAttributes.LastCommit.ID == lastCommit {
 				// last_commit does not change, so re-update thread"
-				_, _, _, err := slackClient.UpdateMessage(channel, timestamp, slack.MsgOptionBlocks(msgBlock...))
+				_, _, _, err := s.slack.UpdateMessage(channel, timestamp, slack.MsgOptionBlocks(msgBlock...))
 				if err != nil {
 					panic(err)
 				}
 			} else {
 				// last_commit is different, so make a post with sub-message"
-				_, _, err := slackClient.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...), slack.MsgOptionTS(timestamp))
+				_, _, err := s.slack.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...), slack.MsgOptionTS(timestamp))
 				if err != nil {
 					panic(err)
 				}
