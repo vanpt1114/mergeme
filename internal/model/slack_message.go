@@ -2,8 +2,9 @@ package model
 
 import (
     "fmt"
-	"github.com/xanzy/go-gitlab"
-	"html"
+    "github.com/slack-go/slack"
+    "github.com/xanzy/go-gitlab"
+    "html"
     "regexp"
 )
 
@@ -35,79 +36,43 @@ func Reverse(s string) string {
     return string(runes)
 }
 
-func Author(user *gitlab.EventUser) (author Block) {
-    author.Type = "context"
-    author.Elements = &[]Child{
-        {
-            Type:       "image",
-            ImageUrl:   user.AvatarURL,
-            AltText:    "default alt",
-        },
-        {
-            Type:   "plain_text",
-            Text:   fmt.Sprintf("<@%s>", user.Username),
-            Emoji:  true,
-        },
-    }
-    return author
+func Author(user *gitlab.EventUser) (author *slack.ContextBlock) {
+	textBlock := slack.NewTextBlockObject(
+	    "plain_text",
+	    fmt.Sprintf("<@%s>", user.Username),false,false)
+	author = slack.NewContextBlock("", []slack.MixedElement{textBlock}...)
+	return author
 }
 
-func Url(data gitlab.MergeEvent) (url Block) {
-    text := fmt.Sprintf(
-        "<%s|*#%d: %s*>\n`%s` ➜ `%s`",
-        data.ObjectAttributes.URL,
-        data.ObjectAttributes.IID,
-        html.UnescapeString(data.ObjectAttributes.Title),
-        data.ObjectAttributes.SourceBranch,
-        data.ObjectAttributes.TargetBranch,
-        )
-    
-    url.Type = "section"
-    url.Text = &Child{
-        Type: "mrkdwn",
-        Text: text,
-    }
+func Url(data gitlab.MergeEvent) (url *slack.SectionBlock) {
+    textBlock :=  slack.NewTextBlockObject("mrkdwn",
+        fmt.Sprintf(
+            "<%s|*#%d: %s*>\n`%s` ➜ `%s`",
+            data.ObjectAttributes.URL,
+            data.ObjectAttributes.IID,
+            html.UnescapeString(data.ObjectAttributes.Title),
+            data.ObjectAttributes.SourceBranch,
+            data.ObjectAttributes.TargetBranch,
+        ), false, false)
+    url = slack.NewSectionBlock(textBlock, nil, nil)
     return url
 }
 
-func Description(data gitlab.MergeEvent) (desc Block) {
+func Description(data gitlab.MergeEvent) (desc *slack.SectionBlock) {
     description := SlackMarkDown(data.ObjectAttributes.Description)
-    desc.Type = "section"
-    desc.Text = &Child{
-        Type: "mrkdwn",
-        Text: description + " ",
-    }
+	textBlock := slack.NewTextBlockObject("mrkdwn", description + " ", false, false)
+	desc = slack.NewSectionBlock(textBlock, nil, nil)
     return desc
 }
 
-func Repo(data gitlab.MergeEvent) Block {
-    if data.Project.AvatarURL== "" {
-        return Block{
-            Type: "context",
-            Elements: &[]Child{
-                {
-                    Type:   "plain_text",
-                    Text:   data.Project.Name,
-                    Emoji:  true,
-                },
-            },
-        }
+func Footer(mr gitlab.MergeEvent) (footer *slack.ContextBlock) {
+    textBlock := slack.NewTextBlockObject("plain_text", mr.Project.Name, false, false)
+    if len(mr.Project.AvatarURL) != 0 {
+        repoIconBlock := slack.NewImageBlockElement(mr.Project.AvatarURL, "Repository icon")
+        footer = slack.NewContextBlock("", []slack.MixedElement{repoIconBlock, textBlock}...)
+        return footer
     }
-    return Block{
-        Type: "context",
-        Elements: &[]Child{
-            {
-                Type:       "image",
-                ImageUrl:   data.Project.AvatarURL,
-                AltText:    "default alt",
-            },
-            {
-                Type:   "plain_text",
-                Text:   data.Project.Name,
-                Emoji:  true,
-            },
-        },
-    }
+    return slack.NewContextBlock("", []slack.MixedElement{textBlock}...)
 }
 
 func SlackMarkDown(data string) string {
