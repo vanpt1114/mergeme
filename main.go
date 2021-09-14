@@ -5,19 +5,16 @@ import (
     "encoding/json"
     "fmt"
     "github.com/vanpt1114/mergeme/config"
+    "github.com/vanpt1114/mergeme/internal/service"
     "github.com/xanzy/go-gitlab"
     "io/ioutil"
     "log"
     "net/http"
-    "os"
-
-    "github.com/vanpt1114/mergeme/internal/service"
 )
 
+var cfg *config.Config
+
 func handler(w http.ResponseWriter, r *http.Request) {
-    GITLAB_TOKEN := os.Getenv("GITLAB_TOKEN")
-    GITLAB_URL := os.Getenv("GITLAB_URL")
-    SLACK_TOKEN := os.Getenv("SLACK_TOKEN")
     body, err := ioutil.ReadAll(r.Body)
     defer r.Body.Close()
     if err != nil {
@@ -44,7 +41,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
        return
     }
-    svc := service.NewService(GITLAB_TOKEN, GITLAB_URL, SLACK_TOKEN)
+    svc := service.NewService(cfg)
     svc.Handle(t)
 }
 
@@ -57,6 +54,7 @@ func main() {
     http.HandleFunc("/health/live", health)
     http.HandleFunc("/health/ready", health)
     http.HandleFunc("/merge-me", handler)
-    fmt.Println("MergeMe is running on at http://127.0.0.1:10080/merge-me")
+    cfg = config.Load()
+    fmt.Println("MergeMe is running on at http://0.0.0.0:10080/merge-me")
     log.Fatal(http.ListenAndServe(":10080", nil))
 }
