@@ -13,13 +13,13 @@ type Config struct {
 
 type Gitlab struct {
 	URL		string
-	Token   string
+	Token	string
 }
 
 type Redis struct {
 	Host		string
 	Password	string
-	DB 			string
+	DB			string
 }
 
 func mustHaveEnv(key string) string {
