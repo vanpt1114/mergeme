@@ -13,14 +13,13 @@ func (s *Service) Close(m Message, r string, o *gitlab.MergeEvent, projectID int
 		s.GetClosedBy(projectID, o.ObjectAttributes.IID),
 	}
 
-	slackClient := slack.New(bearer)
 	timestamp, err := rdb.Get(ctx, r).Result()
 
 	if err == redis.Nil {
 		// Redis key does not exists, rarely happen
 		// Maybe redis cache have been cleared
 		// => Post new message
-		_, respTS, err := slackClient.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
+		_, respTS, err := s.slack.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
 		if err != nil {
 			panic(err)
 		}
@@ -30,7 +29,7 @@ func (s *Service) Close(m Message, r string, o *gitlab.MergeEvent, projectID int
 		panic(err)
 	} else {
 		// Redis key exists, so make an Update to existing thread
-		_, _, _, err := slackClient.UpdateMessage(channel, timestamp, slack.MsgOptionBlocks(msgBlock...))
+		_, _, _, err := s.slack.UpdateMessage(channel, timestamp, slack.MsgOptionBlocks(msgBlock...))
 		if err != nil {
 			panic(err)
 		}

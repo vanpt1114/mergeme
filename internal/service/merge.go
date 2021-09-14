@@ -13,13 +13,11 @@ func (s *Service) Merge(m Message, r string, mr *gitlab.MergeEvent, projectID in
 		s.GetMergedBy(projectID, mr.ObjectAttributes.IID),
 		m.Footer,
 	}
-
-	slackClient := slack.New(bearer)
 	timestamp, err := rdb.Get(ctx, r).Result()
 
 	if err == redis.Nil {
 		// Redis key does not exist, rarely happen
-		_, respTS, err := slackClient.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
+		_, respTS, err := s.slack.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...))
 		if err != nil {
 			panic(err)
 		}
@@ -28,7 +26,7 @@ func (s *Service) Merge(m Message, r string, mr *gitlab.MergeEvent, projectID in
 		panic(err)
 	} else {
 		// Redis key exists, so make an update to the existing thread
-		_, _, _, err := slackClient.UpdateMessage(channel, timestamp, slack.MsgOptionBlocks(msgBlock...))
+		_, _, _, err := s.slack.UpdateMessage(channel, timestamp, slack.MsgOptionBlocks(msgBlock...))
 		if err != nil {
 			panic(err)
 		}

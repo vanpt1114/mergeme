@@ -19,10 +19,6 @@ var rdb = redis.NewClient(&redis.Options{
     DB:       1,
 })
 
-var bearer = os.Getenv("SLACK_TOKEN")
-var gitlab_token = os.Getenv("GITLAB_TOKEN")
-var gitlab_url = os.Getenv("GITLAB_URL")
-
 const (
     BotIcon     = ":buff-mr:"
 )
