@@ -13,7 +13,7 @@ func (s *Service) Merge(m Message, r string, mr *gitlab.MergeEvent, projectID in
 		s.GetMergedBy(projectID, mr.ObjectAttributes.IID),
 		m.Footer,
 	}
-	timestamp, err := rdb.Get(ctx, r).Result()
+	timestamp, err := s.redis.Get(ctx, r).Result()
 
 	if err == redis.Nil {
 		// Redis key does not exist, rarely happen
@@ -21,7 +21,7 @@ func (s *Service) Merge(m Message, r string, mr *gitlab.MergeEvent, projectID in
 		if err != nil {
 			panic(err)
 		}
-		UpdateSlackTs(r, respTS)
+		s.UpdateSlackTs(r, respTS)
 	} else if err != nil {
 		panic(err)
 	} else {

@@ -13,7 +13,7 @@ func (s *Service) Close(m Message, r string, o *gitlab.MergeEvent, projectID int
 		s.GetClosedBy(projectID, o.ObjectAttributes.IID),
 	}
 
-	timestamp, err := rdb.Get(ctx, r).Result()
+	timestamp, err := s.redis.Get(ctx, r).Result()
 
 	if err == redis.Nil {
 		// Redis key does not exists, rarely happen
@@ -24,7 +24,7 @@ func (s *Service) Close(m Message, r string, o *gitlab.MergeEvent, projectID int
 			panic(err)
 		}
 
-		UpdateSlackTs(r, respTS)
+		s.UpdateSlackTs(r, respTS)
 	} else if err != nil {
 		panic(err)
 	} else {

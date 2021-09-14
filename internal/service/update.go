@@ -16,7 +16,7 @@ func (s *Service) Update(m Message, r string, mr *gitlab.MergeEvent, projectID i
 		m.Footer,
 	}
 
-	timestamp, err := rdb.Get(ctx, r).Result()
+	timestamp, err := s.redis.Get(ctx, r).Result()
 
 	if err == redis.Nil {
 		// "[Update_1] Redis key doesn't exist"
@@ -25,13 +25,13 @@ func (s *Service) Update(m Message, r string, mr *gitlab.MergeEvent, projectID i
 		if err != nil {
 			panic(err)
 		}
-		UpdateSlackTs(r, respTS)
-		UpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID)
+		s.UpdateSlackTs(r, respTS)
+		s.UpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID)
 	} else if err != nil {
 		panic("[Update_1] Err")
 	} else {
 		// [Update_1] Found redis key
-		lastCommit, err := rdb.Get(ctx, fmt.Sprintf("%s:lc", r)).Result()
+		lastCommit, err := s.redis.Get(ctx, fmt.Sprintf("%s:lc", r)).Result()
 		if err == redis.Nil {
 			fmt.Println("[Update_2] last_commit not found, cache may be cleared")
 		} else if err != nil {
