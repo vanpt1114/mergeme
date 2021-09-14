@@ -22,6 +22,6 @@ func (s *Service) Open(m Message, r string, o *gitlab.MergeEvent, projectId int,
     }
 
     // Create a redis key with timestamp, so the next event can update to the same thread
-    UpdateSlackTs(r, respTS)
-    UpdateSlackTs(fmt.Sprintf("%s:lc", r), o.ObjectAttributes.LastCommit.ID)
+    s.UpdateSlackTs(r, respTS)
+    s.UpdateSlackTs(fmt.Sprintf("%s:lc", r), o.ObjectAttributes.LastCommit.ID)
 }

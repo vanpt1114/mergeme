@@ -4,13 +4,17 @@ import (
     "fmt"
     "github.com/slack-go/slack"
     "github.com/vanpt1114/mergeme/internal/model"
+    "github.com/go-redis/redis/v8"
     "github.com/xanzy/go-gitlab"
+    "strconv"
+    "os"
     "strings"
 )
 
 type Service struct {
     gitlab  *gitlab.Client
     slack   *slack.Client
+    redis   *redis.Client
 }
 
 func (s *Service) Handle(data gitlab.MergeEvent) {
@@ -33,15 +37,25 @@ func NewService(token, baseURL, slackToken string) *Service {
     if err != nil {
         panic(err)
     }
+    redisDB, err := strconv.Atoi(os.Getenv("REDIS_DB"))
+    if err != nil {
+        panic(err)
+    }
+    rdb := redis.NewClient(&redis.Options{
+        Addr:     os.Getenv("REDIS_HOST"),
+        Password: "",
+        DB:       redisDB,
+    })
     server := &Service{
         gitlab: gl,
         slack: slackClient,
+        redis: rdb,
     }
     return server
 }
 
-func UpdateSlackTs(r, ts string) {
-    err := rdb.Set(ctx, r, ts, 0).Err()
+func (s *Service) UpdateSlackTs(r, ts string) {
+    err := s.redis.Set(ctx, r, ts, 0).Err()
     if err != nil {
         panic(err)
     }

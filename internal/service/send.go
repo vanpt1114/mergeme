@@ -4,20 +4,11 @@ import (
     "context"
     "fmt"
     "github.com/slack-go/slack"
-    "os"
-
-    "github.com/go-redis/redis/v8"
     "github.com/vanpt1114/mergeme/config"
     "github.com/xanzy/go-gitlab"
 )
 
 var ctx = context.Background()
-
-var rdb = redis.NewClient(&redis.Options{
-    Addr:     os.Getenv("REDIS_HOST"),
-    Password: "",
-    DB:       1,
-})
 
 const (
     BotIcon     = ":buff-mr:"
