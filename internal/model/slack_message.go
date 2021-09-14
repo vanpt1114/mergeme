@@ -36,7 +36,7 @@ func Reverse(s string) string {
     return string(runes)
 }
 
-func NewAuthor(user *gitlab.EventUser) (author *slack.ContextBlock) {
+func Author(user *gitlab.EventUser) (author *slack.ContextBlock) {
 	textBlock := slack.NewTextBlockObject(
 	    "plain_text",
 	    fmt.Sprintf("<@%s>", user.Username),false,false)
@@ -44,7 +44,7 @@ func NewAuthor(user *gitlab.EventUser) (author *slack.ContextBlock) {
 	return author
 }
 
-func NewUrl(data gitlab.MergeEvent) (url *slack.SectionBlock) {
+func Url(data gitlab.MergeEvent) (url *slack.SectionBlock) {
     textBlock :=  slack.NewTextBlockObject("mrkdwn",
         fmt.Sprintf(
             "<%s|*#%d: %s*>\n`%s` ➜ `%s`",
@@ -58,14 +58,14 @@ func NewUrl(data gitlab.MergeEvent) (url *slack.SectionBlock) {
     return url
 }
 
-func NewDescription(data gitlab.MergeEvent) (desc *slack.SectionBlock) {
+func Description(data gitlab.MergeEvent) (desc *slack.SectionBlock) {
     description := SlackMarkDown(data.ObjectAttributes.Description)
 	textBlock := slack.NewTextBlockObject("mrkdwn", description + " ", false, false)
 	desc = slack.NewSectionBlock(textBlock, nil, nil)
     return desc
 }
 
-func NewFooter(mr gitlab.MergeEvent) (footer *slack.ContextBlock) {
+func Footer(mr gitlab.MergeEvent) (footer *slack.ContextBlock) {
     textBlock := slack.NewTextBlockObject("plain_text", mr.Project.Name, false, false)
     if len(mr.Project.AvatarURL) != 0 {
         repoIconBlock := slack.NewImageBlockElement(mr.Project.AvatarURL, "Repository icon")
