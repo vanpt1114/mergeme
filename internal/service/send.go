@@ -22,7 +22,10 @@ type Message struct {
 }
 
 func (s *Service) SendMessage(m Message, projectId int, mr gitlab.MergeEvent) {
-    channel := config.CheckAllow(projectId)
+    channel, err := config.CheckAllow(projectId)
+    if err != nil {
+        panic(err)
+    }
     redisKey := fmt.Sprintf("service:mr:%d", mr.ObjectAttributes.ID)
 
     // Switch-case by event `action` field

@@ -1,5 +1,7 @@
 package config
 
+import "errors"
+
 var AllowProject = map[int]string{
     // 1604: "C019QRNJ6DN",
     1052: "C01AY72GHT2",
@@ -14,10 +16,10 @@ var AllowProject = map[int]string{
     16307281: "C015ZH0JUDC",
 }
 
-func CheckAllow(projectId int) (channel string) {
-    channel, ok := AllowProject[projectId]
-    if ok == false {
-        return ""
+func CheckAllow(projectId int) (channel string, err error) {
+    channel, exist := AllowProject[projectId]
+    if !exist {
+        return "", errors.New("project is not allowed")
     }
-    return
+    return channel, nil
 }

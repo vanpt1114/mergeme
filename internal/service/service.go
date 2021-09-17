@@ -18,7 +18,7 @@ type Service struct {
     redis   *redis.Client
 }
 
-func (s *Service) Handle(data gitlab.MergeEvent) {
+func (s *Service) HandleEvent(data gitlab.MergeEvent) {
     projectID := data.Project.ID
     msgBlock := Message{
         Author:      model.Author(data.User),
@@ -108,4 +108,23 @@ func (s *Service) GetClosedBy(projectID, mrIID int) (closedBy *slack.SectionBloc
     closedBy = slack.NewSectionBlock(textBlock, nil, nil)
 
     return closedBy
+}
+
+func (s *Service) shouldSkipMergeRequest(event gitlab.MergeEvent) bool {
+    // Only allowed selected projects, listed in config/allow.go
+	if _, err := config.CheckAllow(event.Project.ID); err != nil {
+	    return true
+    }
+
+    // Reject WIP/Draft MR
+    if event.ObjectAttributes.WorkInProgress {
+    	return true
+    }
+
+    // Check state of MR, reject merged, closed MR
+    if event.ObjectAttributes.State != "opened" && event.ObjectAttributes.Action == "update" {
+        return true
+    }
+
+    return false
 }
