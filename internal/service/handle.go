@@ -23,7 +23,10 @@ func (s *Service) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	if s.shouldSkipMergeRequest(event) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Skip MR"))
+		_, err = w.Write([]byte("Skip MR"))
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
