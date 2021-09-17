@@ -28,7 +28,7 @@ func (s *Service) Update(m Message, r string, mr *gitlab.MergeEvent, projectID i
 		s.UpdateSlackTs(r, respTS)
 		s.UpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID)
 	} else if err != nil {
-		panic("[Update_1] Err")
+		panic(err)
 	} else {
 		// [Update_1] Found redis key
 		lastCommit, err := s.redis.Get(ctx, fmt.Sprintf("%s:lc", r)).Result()
