@@ -12,6 +12,6 @@ jobs:
     container: golangci/golangci-lint:v1.42-alpine
     steps:
       - name: list files
-        run: pwd && ls -al
-      - name: golang lint
-        run: golangci-lint run
+        run: pwd
+      - name: 1a
+        run: ls -al
