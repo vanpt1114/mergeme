@@ -12,5 +12,5 @@ jobs:
     container: golangci/golangci-lint:v1.42-alpine
     steps:
       - uses: actions/checkout@v2
-      - name: 1a
-        run: ls -al
+      - name: golang lint
+        run: golangci-lint run
