@@ -1,0 +1,15 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container: golangci/golangci-lint:v1.42-alpine
+    steps:
+      - name: golang lint
+        run: golangci-lint run
