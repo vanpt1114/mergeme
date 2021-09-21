@@ -6,6 +6,7 @@ import (
     "github.com/vanpt1114/mergeme/internal/service"
     "log"
     "net/http"
+    "os"
 )
 
 var cfg *config.Config
@@ -21,5 +22,5 @@ func main() {
     http.HandleFunc("/health/ready", health)
     http.HandleFunc("/merge-me", svc.HandleRequest)
     fmt.Println("MergeMe is running on at http://0.0.0.0:10080/merge-me")
-    log.Fatal(http.ListenAndServe(":10080", nil))
+    log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), nil))
 }
