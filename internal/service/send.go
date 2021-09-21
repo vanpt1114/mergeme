@@ -5,6 +5,8 @@ import (
     "fmt"
     "github.com/slack-go/slack"
     "github.com/vanpt1114/mergeme/config"
+    "github.com/vanpt1114/mergeme/internal/bot/message_display"
+    "github.com/vanpt1114/mergeme/internal/model"
     "github.com/xanzy/go-gitlab"
 )
 
@@ -21,7 +23,7 @@ type Message struct {
     Footer      slack.Block
 }
 
-func (s *Service) SendMessage(m Message, projectId int, mr gitlab.MergeEvent) {
+func (s *Service) SendMessage(m model.Message, projectId int, mr gitlab.MergeEvent) {
     channel, err := config.CheckAllow(projectId)
     if err != nil {
         panic(err)
@@ -31,12 +33,15 @@ func (s *Service) SendMessage(m Message, projectId int, mr gitlab.MergeEvent) {
     // Switch-case by event `action` field
     switch mr.ObjectAttributes.Action {
     case "open", "reopen":
-        s.Open(m, redisKey, &mr, projectId, channel)
+        //s.Open(m, redisKey, &mr, projectId, channel)
+        message_display.Open(m, redisKey, channel, &mr, s.gitlab, s.slack, s.redis)
     case "update":
-        s.Update(m, redisKey, &mr, projectId, channel)
+        message_display.Update(m, redisKey, channel, &mr, s.gitlab, s.slack, s.redis)
     case "close":
-        s.Close(m, redisKey, &mr, projectId, channel)
+        message_display.Close(m, redisKey, channel, &mr, s.gitlab, s.slack, s.redis)
     case "merge":
-        s.Merge(m, redisKey, &mr, projectId, channel)
+        message_display.Merge(m, redisKey, channel, &mr, s.gitlab, s.slack, s.redis)
+    default:
+        fmt.Printf("%s does not supported yet", mr.ObjectAttributes.Action)
     }
 }

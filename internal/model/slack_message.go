@@ -8,6 +8,13 @@ import (
     "regexp"
 )
 
+type Message struct {
+    Author      slack.Block
+    Url         slack.Block
+    Description slack.Block
+    Footer      slack.Block
+}
+
 const (
     toDoIcon        = ":todo:"
     toDoDoneIcon    = ":todo_done:"

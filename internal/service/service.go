@@ -20,7 +20,7 @@ type Service struct {
 
 func (s *Service) HandleEvent(data gitlab.MergeEvent) {
     projectID := data.Project.ID
-    msgBlock := Message{
+    msgBlock := model.Message{
         Author:      model.Author(data.User),
         Url:         model.Url(data),
         Description: model.Description(data),
