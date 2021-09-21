@@ -18,7 +18,7 @@ func Update(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitla
 		m.Author,
 		m.Url,
 		m.Description,
-		bot.NewGetReviewers(mr.Project.ID, mr.ObjectAttributes.IID, gl),
+		bot.GetReviewers(mr.Project.ID, mr.ObjectAttributes.IID, gl),
 		m.Footer,
 	}
 
@@ -31,8 +31,8 @@ func Update(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitla
 		if err != nil {
 			panic(err)
 		}
-		bot.NewUpdateSlackTs(r, respTS, rl)
-		bot.NewUpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID, rl)
+		bot.UpdateSlackTs(r, respTS, rl)
+		bot.UpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID, rl)
 	} else if err != nil {
 		panic(err)
 	} else {

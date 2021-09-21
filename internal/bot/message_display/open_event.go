@@ -15,7 +15,7 @@ func Open(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitlab.
 		m.Author,
 		m.Url,
 		m.Description,
-		bot.NewGetReviewers(mr.Project.ID, mr.ObjectAttributes.IID, gl),
+		bot.GetReviewers(mr.Project.ID, mr.ObjectAttributes.IID, gl),
 		m.Footer,
 	}
 
@@ -26,6 +26,6 @@ func Open(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitlab.
 	}
 
 	// Create a redis key with timestamp, so the next event can update to the same thread
-	bot.NewUpdateSlackTs(r, respTS, rl)
-	bot.NewUpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID, rl)
+	bot.UpdateSlackTs(r, respTS, rl)
+	bot.UpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID, rl)
 }

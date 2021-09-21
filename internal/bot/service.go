@@ -11,7 +11,7 @@ import (
 
 var ctx = context.Background()
 
-func NewGetReviewers(projectID, mrIID int, gl *gitlab.Client) (reviewers *slack.SectionBlock) {
+func GetReviewers(projectID, mrIID int, gl *gitlab.Client) (reviewers *slack.SectionBlock) {
 	mr, _, err := gl.MergeRequests.GetMergeRequest(projectID, mrIID, nil)
 	if err != nil {
 		panic(err)
@@ -30,14 +30,14 @@ func NewGetReviewers(projectID, mrIID int, gl *gitlab.Client) (reviewers *slack.
 	return reviewers
 }
 
-func NewUpdateSlackTs(r, ts string, rl *redis.Client) {
+func UpdateSlackTs(r, ts string, rl *redis.Client) {
 	err := rl.Set(ctx, r, ts, 0).Err()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func NewGetClosedBy(projectID, mrIID int, gl *gitlab.Client) (closedBy *slack.SectionBlock) {
+func GetClosedBy(projectID, mrIID int, gl *gitlab.Client) (closedBy *slack.SectionBlock) {
 	mr, _, err := gl.MergeRequests.GetMergeRequest(projectID, mrIID, nil)
 	if err != nil {
 		panic(err)
@@ -52,7 +52,7 @@ func NewGetClosedBy(projectID, mrIID int, gl *gitlab.Client) (closedBy *slack.Se
 	return closedBy
 }
 
-func NewGetMergedBy(projectID, mrIID int, gl *gitlab.Client) (mergedBy *slack.SectionBlock) {
+func GetMergedBy(projectID, mrIID int, gl *gitlab.Client) (mergedBy *slack.SectionBlock) {
 	mr, _, err := gl.MergeRequests.GetMergeRequest(projectID, mrIID, nil)
 	if err != nil {
 		panic(err)

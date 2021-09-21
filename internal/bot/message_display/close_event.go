@@ -13,7 +13,7 @@ func Close(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitlab
 	msgBlock := []slack.Block{
 		m.Author,
 		m.Url,
-		bot.NewGetClosedBy(mr.Project.ID, mr.ObjectAttributes.IID, gl),
+		bot.GetClosedBy(mr.Project.ID, mr.ObjectAttributes.IID, gl),
 	}
 
 	timestamp, err := rl.Get(ctx, r).Result()
@@ -31,7 +31,7 @@ func Close(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitlab
 			panic(err)
 		}
 
-		bot.NewUpdateSlackTs(r, respTS, rl)
+		bot.UpdateSlackTs(r, respTS, rl)
 	} else if err != nil {
 		panic(err)
 	} else {

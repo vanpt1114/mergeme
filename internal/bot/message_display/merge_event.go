@@ -13,7 +13,7 @@ func Merge(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitlab
 	msgBlock := []slack.Block{
 		m.Author,
 		m.Url,
-		bot.NewGetMergedBy(mr.Project.ID, mr.ObjectAttributes.IID, gl),
+		bot.GetMergedBy(mr.Project.ID, mr.ObjectAttributes.IID, gl),
 		m.Footer,
 	}
 	timestamp, err := rl.Get(ctx, r).Result()
