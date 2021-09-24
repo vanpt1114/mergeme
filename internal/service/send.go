@@ -35,7 +35,7 @@ func (s *Service) SendMessage(m model.Message, projectId int, mr gitlab.MergeEve
     case "open", "reopen":
         //s.Open(m, redisKey, &mr, projectId, channel)
         message_display.Open(m, redisKey, channel, &mr, s.gitlab, s.slack, s.redis)
-    case "update":
+    case "update", "approved", "unapproved":
         message_display.Update(m, redisKey, channel, &mr, s.gitlab, s.slack, s.redis)
     case "close":
         message_display.Close(m, redisKey, channel, &mr, s.gitlab, s.slack, s.redis)

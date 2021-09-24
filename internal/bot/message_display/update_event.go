@@ -19,6 +19,7 @@ func Update(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitla
 		m.Url,
 		m.Description,
 		bot.GetReviewers(mr.Project.ID, mr.ObjectAttributes.IID, gl),
+		bot.ActionButton(mr.Project.ID, mr.ObjectAttributes.IID, gl),
 		m.Footer,
 	}
 
