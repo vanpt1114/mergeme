@@ -1,8 +1,6 @@
 package service
 
 import (
-    "encoding/json"
-    "fmt"
     "github.com/go-redis/redis/v8"
     "github.com/slack-go/slack"
     "github.com/vanpt1114/mergeme/config"
@@ -73,19 +71,19 @@ func (s *Service) shouldSkipMergeRequest(event gitlab.MergeEvent) bool {
     return false
 }
 
-func (s *Service) shouldSkipAction(event slack.InteractionCallback) bool {
-    for _, action := range event.ActionCallback.BlockActions {
-        var tmp model.CustomAction
-        err := json.Unmarshal([]byte(action.Value), &tmp)
-        if err != nil {
-            panic(err)
-        }
-        fmt.Println(tmp)
-
-        if tmp.Clicked {
-            return true
-        }
-    }
-    return false
-}
+//func (s *Service) shouldSkipAction(event slack.InteractionCallback) bool {
+//    for _, action := range event.ActionCallback.BlockActions {
+//        var tmp model.CustomAction
+//        err := json.Unmarshal([]byte(action.Value), &tmp)
+//        if err != nil {
+//            panic(err)
+//        }
+//        fmt.Println(tmp)
+//
+//        if tmp.Clicked {
+//            return true
+//        }
+//    }
+//    return false
+//}
 

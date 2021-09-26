@@ -1,7 +1,6 @@
 package service
 
 import (
-    "context"
     "fmt"
     "github.com/slack-go/slack"
     "github.com/vanpt1114/mergeme/config"
@@ -9,8 +8,6 @@ import (
     "github.com/vanpt1114/mergeme/internal/model"
     "github.com/xanzy/go-gitlab"
 )
-
-var ctx = context.Background()
 
 const (
     BotIcon     = ":buff-mr:"
