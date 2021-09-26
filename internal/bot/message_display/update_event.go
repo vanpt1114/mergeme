@@ -51,8 +51,20 @@ func Update(m model.Message, r, channel string, mr *gitlab.MergeEvent, gl *gitla
 					panic(err)
 				}
 			} else {
-				// last_commit is different, so make a post with sub-message"
-				_, _, err := sl.PostMessage(channel, slack.MsgOptionBlocks(msgBlock...), slack.MsgOptionTS(timestamp))
+				// last_commit is different, so make a post with sub-message
+				// First, we would post a new sub-message in the thread of MR
+				// with the shortly commit description.
+				updateText := slack.NewTextBlockObject("mrkdwn", mr.ObjectAttributes.LastCommit.Message, false, false)
+				updateBlock := slack.NewSectionBlock(updateText, nil, nil)
+				_, _, err := sl.PostMessage(channel, slack.MsgOptionBlocks(updateBlock), slack.MsgOptionTS(timestamp))
+				if err != nil {
+					panic(err)
+				}
+
+				bot.UpdateSlackTs(fmt.Sprintf("%s:lc", r), mr.ObjectAttributes.LastCommit.ID, rl)
+
+				// Then, we will update the main message to re-update the state of the MR
+				_, _, _, err = sl.UpdateMessage(channel, timestamp, slack.MsgOptionBlocks(msgBlock...))
 				if err != nil {
 					panic(err)
 				}

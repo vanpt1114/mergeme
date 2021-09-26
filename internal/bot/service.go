@@ -3,11 +3,13 @@ package bot
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/slack-go/slack"
 	"github.com/vanpt1114/mergeme/internal/model"
 	"github.com/xanzy/go-gitlab"
+	"strconv"
 	"strings"
 )
 
@@ -84,8 +86,13 @@ func ActionButton(pid int, iid int, gl *gitlab.Client) (buttonBlock *slack.Actio
 		Clicked:        false,
 	}
 
-	diffTxt := slack.NewTextBlockObject("plain_text", "", false, false)
+	diffTxt := slack.NewTextBlockObject("plain_text", "Diff", false, false)
 	diffBtnEle := slack.NewButtonBlockElement("diff", "data_to_send", diffTxt)
+	diffValue := model.CustomAction{
+		ProjectID:      pid,
+		MergeRequestID: iid,
+		Clicked:        false,
+	}
 
 	if mrStatus.Approved {
 		approveTxt.Text = "Approved"
@@ -95,17 +102,23 @@ func ActionButton(pid int, iid int, gl *gitlab.Client) (buttonBlock *slack.Actio
 		approveTxt.Text = "Approve"
 	}
 
-	b, err := json.Marshal(approveValue)
+	bApprove, err := json.Marshal(approveValue)
 	if err != nil {
 		panic(err)
 	}
-	approveBtnEle.Value = string(b)
+	bDiff, err := json.Marshal(diffValue)
+	if err != nil {
+		panic(err)
+	}
+
+	approveBtnEle.Value = string(bApprove)
+	diffBtnEle.Value = string(bDiff)
 	buttonBlock = slack.NewActionBlock("button", approveBtnEle, diffBtnEle)
 
 	return buttonBlock
 }
 
-func HandleActionEvent(event slack.InteractionCallback, gl *gitlab.Client) {
+func HandleActionEvent(event slack.InteractionCallback, gl *gitlab.Client, sl *slack.Client) error {
 	for _, action := range event.ActionCallback.BlockActions {
 		var tmp model.CustomAction
 		err := json.Unmarshal([]byte(action.Value), &tmp)
@@ -119,12 +132,19 @@ func HandleActionEvent(event slack.InteractionCallback, gl *gitlab.Client) {
 		case "approve":
 			err := handleApproveButton(tmp.ProjectID, tmp.MergeRequestID, gl)
 			if err != nil {
-				fmt.Println(err)
+				return err
+			}
+		case "diff":
+			err := handleDiffButton(event, tmp.ProjectID, tmp.MergeRequestID, gl, sl)
+			if err != nil {
+				return err
 			}
 		default:
 			fmt.Printf("%s does not supported yet\n", action.ActionID)
+			return nil
 		}
 	}
+	return nil
 }
 
 
@@ -132,6 +152,56 @@ func handleApproveButton(pid, iid int, gl *gitlab.Client) error {
 	_, resp, err := gl.MergeRequestApprovals.ApproveMergeRequest(pid, iid, nil)
 	if err != nil {
 		fmt.Println(resp.Body)
+		return err
 	}
+	return nil
+}
+
+func handleDiffButton(event slack.InteractionCallback, pid, iid int, gl *gitlab.Client, sl *slack.Client) error {
+	var sumAdded, sumRemoved int = 0, 0
+	var diffStr []string
+	mr, _, err := gl.MergeRequests.GetMergeRequestChanges(pid, iid, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	changesCount, _ := strconv.Atoi(mr.ChangesCount)
+	if changesCount > 5 {
+		return errors.New("exceed max diff")
+	}
+
+	for _, change := range mr.Changes {
+		if change.DeletedFile {
+			continue
+		}
+
+		// Count numbers of lines changes
+		// Should ignore MR that effects more than 100 lines
+		// Because displaying 100+ lines on slack is consider spam
+		added := strings.Count(change.Diff, "+  ")
+		removed := strings.Count(change.Diff, "-  ")
+		sumAdded = sumAdded + added
+		sumRemoved = sumRemoved + removed
+
+		// Message formatting
+		diffStr = append(diffStr, "File: " + change.NewPath + "\n")
+		diffStr = append(diffStr, "```" + change.Diff + "```\n")
+	}
+
+	if sumAdded > 100 || sumRemoved > 100 {
+		return errors.New("exceed max diff")
+	}
+
+	diffText := slack.NewTextBlockObject("mrkdwn", strings.Join(diffStr, ""), false, false)
+	diffBlock := slack.NewSectionBlock(diffText, nil, nil)
+
+	_, _, err = sl.PostMessage(
+		event.Channel.ID,
+		slack.MsgOptionBlocks(diffBlock),
+		slack.MsgOptionTS(event.Message.Timestamp))
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return nil
 }

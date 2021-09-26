@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/slack-go/slack"
 	"github.com/vanpt1114/mergeme/internal/bot"
 	"github.com/xanzy/go-gitlab"
@@ -53,12 +52,16 @@ func (s *Service) HandleAction(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	if s.shouldSkipAction(event) {
-		fmt.Println("button has been clicked")
-		return
-	}
+	//if s.shouldSkipAction(event) {
+	//	fmt.Println("button has been clicked")
+	//	return
+	//}
 
-	bot.HandleActionEvent(event, s.gitlab)
+	err = bot.HandleActionEvent(event, s.gitlab, s.slack)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("error when clicking button"))
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
