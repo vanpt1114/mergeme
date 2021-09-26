@@ -21,6 +21,7 @@ func main() {
     http.HandleFunc("/health/live", health)
     http.HandleFunc("/health/ready", health)
     http.HandleFunc("/merge-me", svc.HandleRequest)
+    http.HandleFunc("/merge-me/approve", svc.HandleAction)
     fmt.Println("MergeMe is running on at http://0.0.0.0:10080/merge-me")
     log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), nil))
 }
