@@ -11,4 +11,5 @@ ENTRYPOINT ["./merge-me"]
 
 FROM gcr.io/distroless/base-debian10
 COPY --from=go-builder /app/merge-me /
+COPY --from=go-builder /app/default.yaml /
 CMD ["/merge-me"]

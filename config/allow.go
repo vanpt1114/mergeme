@@ -1,21 +1,14 @@
 package config
 
-import "errors"
+import (
+    "errors"
+    "github.com/vanpt1114/mergeme/internal/model"
+    "gopkg.in/yaml.v2"
+    "io/ioutil"
+    "os"
+)
 
-var AllowProject = map[int]string{
-    // 1604: "C019QRNJ6DN",
-    1052: "C01AY72GHT2",
-    1714: "C01AY72GHT2", // sre/application.cluster, channel #sre-hcm
-    1750: "C01AY72GHT2",
-    1603: "C01FPJ7CHGQ", // ERP Staff Desktop, channel #hcm-frontend-dev
-    //1603: "C019QRNJ6DN", // ERP Staff Desktop, channel #new-test-alerts
-    1640: "C01FPJ7CHGQ",
-    1038: "C019QRNJ6DN", // workloads develop, channel #new-test-alerts, test
-    1067: "C019QRNJ6DN", // workloads staging, channel #new-test-alerts, test
-    1068: "C019QRNJ6DN", // workloads production, channel #new-test-alerts
-    16307281: "C015ZH0JUDC",
-    833: "C015ZH0JUDC",
-}
+var AllowProject = make(map[int]string)
 
 func CheckAllow(projectId int) (channel string, err error) {
     channel, exist := AllowProject[projectId]
@@ -23,4 +16,25 @@ func CheckAllow(projectId int) (channel string, err error) {
         return "", errors.New("project is not allowed")
     }
     return channel, nil
+}
+
+func InitProjectsMapping() error {
+    var data model.ProjectsMapping
+
+    pwd, _ := os.Getwd()
+    yamlFile, err := ioutil.ReadFile(pwd + "/default.yaml")
+    if err != nil {
+        panic(err)
+    }
+
+    err = yaml.Unmarshal(yamlFile, &data)
+    if err != nil {
+        panic(err)
+    }
+
+    for _, value := range data.Projects {
+        AllowProject[value.ID] = value.Channel
+    }
+
+    return nil
 }
