@@ -9,6 +9,7 @@ type Config struct {
 	Gitlab			Gitlab
 	Redis			Redis
 	SlackToken		string
+	ProjectsMapping map[int]string
 }
 
 type Gitlab struct {
@@ -37,6 +38,10 @@ func getEnv(key, fallback string) string {
 }
 
 func Load() (c *Config) {
+	err := InitProjectsMapping()
+	if err != nil {
+		panic(err)
+	}
 	c = &Config{
 		Gitlab:     Gitlab{
 			URL:   mustHaveEnv("GITLAB_URL"),

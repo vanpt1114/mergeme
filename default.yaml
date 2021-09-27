@@ -1,0 +1,7 @@
+projects:
+  - name: monitor-hcm
+    channel: C015ZH0JUDC
+    id: 16307281
+  - name: test-1
+    channel: C015ZH0JUDC
+    id: 883

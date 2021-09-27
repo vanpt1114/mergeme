@@ -1,5 +1,6 @@
 .idea/
 vendor/
+projects-mapping/
 export.example
 example.env
 .gitlab-ci.yml
